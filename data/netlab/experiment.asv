@@ -1,0 +1,1559 @@
+clear all
+gen=input('Do you want to generate data? Yes(Y):generate data; No(N) Y/N : ','s');
+if gen=='Y' | gen=='y'
+    k=input('How many clusters do you want for data generation? ');
+    dim=input('How many rows do you want for data generation? ');
+    v=input('How many features do you want for data generation? ');
+    type=input('What model of data generation do you want to use (1)spherical (2)PPCA (3)Boris?');
+    if type==2
+        disp('PPCA Data generation.....')
+        hid_dim=input('How many hidden dimensions do you want for data generation? ');
+        sigma_square=input('How many sigma square do you want? ');
+        discen=input('How many distance between cluster centers? ');
+        choice=input('What kind of ellipsoid size (1)k (2)k.^2 (3)2 (4)1 ?');
+    elseif type==1
+        disp('Spherical Data generation.....')
+        discen=input('How many distance between cluster centers? ');
+        choice=input('What kind of ellipsoid size (1)k (2)k.^2 (3)2 (4)1 ?');
+    elseif type==3
+        disp('Boris Option.......')
+        discen=input('How many distance between cluster centers? ');
+    end
+else
+    data=load('dc_clus.dat');
+    data1=load('mutz_clus.dat');
+%     real=load('test_gg.dat');syn=load('test_ff.dat');data=real./syn;
+    [dim v]=size(data);
+    [dim1 v1]=size(data1);
+end
+times=input('How many simulations do you want? ');
+
+% fid1=fopen('m_sqt.dat','a');
+% fid2=fopen('m_mot.dat','a');
+% fid3=fopen('m_jt.dat','a');
+% fid4=fopen('m_at.dat','a');
+% fid5=fopen('m_ht.dat','a');
+% fid6=fopen('m_ct.dat','a');
+% fid7=fopen('m_st.dat','a');
+% fid8=fopen('m_dt.dat','a');
+% 
+% fid9=fopen('t_sqt.dat','a');
+% fid10=fopen('t_mot.dat','a');
+% fid11=fopen('t_jt.dat','a');
+% fid12=fopen('t_at.dat','a');
+% fid13=fopen('t_ht.dat','a');
+% fid14=fopen('t_ct.dat','a');
+% fid15=fopen('t_st.dat','a');
+% fid16=fopen('t_dt.dat','a');
+% 
+% fid17=fopen('aver_overlap_sqt.dat','a');
+% fid18=fopen('aver_overlap_mot.dat','a');
+% fid19=fopen('aver_overlap_jt.dat','a');
+% fid20=fopen('aver_overlap_at.dat','a');
+% fid21=fopen('aver_overlap_ht.dat','a');
+% fid22=fopen('aver_overlap_ct.dat','a');
+% fid23=fopen('aver_overlap_st.dat','a');
+% fid24=fopen('aver_overlap_dt.dat','a');
+% 
+% fid25=fopen('adc_sq_euclit.dat','a');
+% fid26=fopen('adc_mo_euclit.dat','a');
+% fid27=fopen('adc_j_euclit.dat','a');
+% fid28=fopen('adc_a_euclit.dat','a');
+% fid29=fopen('adc_h_euclit.dat','a');
+% fid30=fopen('adc_c_euclit.dat','a');
+% fid31=fopen('adc_s_euclit.dat','a');
+% fid32=fopen('adc_d_euclit.dat','a');
+% 
+% fid33=fopen('adc_sq_mant.dat','a');
+% fid34=fopen('adc_mo_mant.dat','a');
+% fid35=fopen('adc_j_mant.dat','a');
+% fid36=fopen('adc_a_mant.dat','a');
+% fid37=fopen('adc_h_mant.dat','a');
+% fid38=fopen('adc_c_mant.dat','a');
+% fid39=fopen('adc_s_mant.dat','a');
+% fid40=fopen('adc_d_mant.dat','a');
+% 
+% fid41=fopen('ari_sqt.dat','a');
+% fid42=fopen('ari_mot.dat','a');
+% fid43=fopen('ari_jt.dat','a');
+% fid44=fopen('ari_at.dat','a');
+% fid45=fopen('ari_ht.dat','a');
+% fid46=fopen('ari_ct.dat','a');
+% fid47=fopen('ari_st.dat','a');
+% fid48=fopen('ari_dt.dat','a');
+% 
+% fid52=fopen('clus_sqt.dat','a');
+% fid53=fopen('clus_mot.dat','a');
+% fid54=fopen('clus_jt.dat','a');
+% fid55=fopen('clus_at.dat','a');
+% fid56=fopen('clus_ht.dat','a');
+% fid57=fopen('clus_ct.dat','a');
+% fid58=fopen('clus_st.dat','a');
+% fid59=fopen('clus_dt.dat','a');
+% if type==1
+%     fid49=fopen('cloyvbt.dat','a');
+%     fid50=fopen('aucdfbt.dat','a');
+%     fid51=fopen('avdisbt.dat','a');
+% elseif type==2
+%     if choice==2
+%         fid49=fopen('cloyvptwot.dat','a');
+%         fid50=fopen('aucdfptwot.dat','a');
+%         fid51=fopen('avdisptwot.dat','a');
+%     elseif choice==4
+%         fid49=fopen('cloyvpfot.dat','a');
+%         fid50=fopen('aucdfpfot.dat','a');
+%         fid51=fopen('avdispfot.dat','a');
+%     end
+% elseif type==3
+%     fid49=fopen('cloyvst.dat','a');
+%     fid50=fopen('aucdfst.dat','a');
+%     fid51=fopen('avdisst.dat','a');
+% end
+% fid60=fopen('del.dat','a');
+for times_count=1:times
+    con_table_mo=0;con_table_sq=0;
+    if gen=='Y' | gen=='y'
+        if type==2
+            mix=gmm(v,k,'ppca',hid_dim,dim,sigma_square,discen);
+            centres=mix.centres;priors=mix.priors;
+            [data,label]=gmmsamp(mix,dim,choice);
+            del(times_count)=1-sum(mix.priors.^2);
+            fprintf(fid60,'%f\n',del(times_count));
+            if choice==2
+                save('data3.dat','data','-ASCII')
+            elseif choice==4
+                save('data4.dat','data','-ASCII')
+            end
+        elseif type==1
+            mix=gmm(v,k,'spherical',1,dim,1,discen);
+            centres=mix.centres;priors=mix.priors;
+            [data,label]=gmmsamp(mix,dim,choice);
+            del(times_count)=1-sum(mix.priors.^2);
+            fprintf(fid60,'%f\n',del(times_count));
+            save('data2.dat','data','-ASCII')
+        elseif type==3
+            [data,label,priors,centres]=gareth_randn(v,k,dim,discen);
+            del(times_count)=1-sum(priors.^2);
+            save('data1.dat','data','-ASCII')
+        end
+    else
+        data=load('dc_clus.dat');
+    end
+    [R,C]=size(data);
+    num_cate=0;wh_col=0;
+
+    y=standard(data,num_cate,wh_col,1,0);
+    
+    k_deter_start=2;
+    k_deter_end=10;
+    times_app=25;
+
+    [sk_h,sk_len_h,stand_cent_h,real_cent_h]=k_deter_hk(data,y,k_deter_start,k_deter_end,dim,v,times_app);
+    [R_h,C_h]=size(sk_h);
+    clus_h(times_count)=R_h;
+    
+    removal_threshold_sq=1;
+    [sk_sq,sk_len_sq,stand_cent_sq,real_cent_sq]=anomalous_pattern_kmeans(data,y,1,0,removal_threshold_sq);
+    [R_sq,C_sq]=size(sk_sq);
+    
+    removal_threshold_mo=1;
+    ym=standard(data,num_cate,wh_col,0,1);
+    [sk_mo,sk_len_mo,stand_cent_mo,real_cent_mo]=anomalous_pattern_kmeans(data,ym,0,1,removal_threshold_mo);
+    [R_mo,C_mo]=size(sk_mo);
+    
+    removal_threshold_sq=1;
+    [sk_sq_r,sk_len_sq_r,stand_cent_sq_r,real_cent_sq_r]=anomalous_pattern_kmeans(data,y,1,0,removal_threshold_sq);
+    [R_sq_r,C_sq_r]=size(sk_sq_r);
+    while R_sq_r>=R_h*1.15
+        removal_threshold_sq=removal_threshold_sq+1;
+        [sk_sq_r,sk_len_sq_r,stand_cent_sq_r,real_cent_sq_r]=anomalous_pattern_kmeans(data,y,1,0,removal_threshold_sq);
+        [R_sq_r,C_sq_r]=size(sk_sq_r);
+    end
+    remove_thres_sq(times_count)=removal_threshold_sq;
+    clus_sq_r(times_count)=R_sq_r;
+
+    %     for i=1:R_sq
+    %         stand_cent_sq(i,:)
+    %         y(sk_sq(i,1:sk_len_sq(i))',:)
+    %     end
+
+    removal_threshold_mo=1;
+    ym=standard(data,num_cate,wh_col,0,1);
+    [sk_mo_r,sk_len_mo_r,stand_cent_mo_r,real_cent_mo_r]=anomalous_pattern_kmeans(data,ym,0,1,removal_threshold_mo);
+    [R_mo_r,C_mo_r]=size(sk_mo_r);
+    while R_mo_r>=R_h*1.15
+        removal_threshold_mo=removal_threshold_mo+1;
+        [sk_mo_r,sk_len_mo_r,stand_cent_mo_r,real_cent_mo_r]=anomalous_pattern_kmeans(data,ym,0,1,removal_threshold_mo);
+        [R_mo_r,C_mo_r]=size(sk_mo_r);
+    end
+    remove_thres_mo(times_count)=removal_threshold_mo;
+    clus_mo_r(times_count)=R_mo_r;
+    
+    
+    %     for i=1:R_mo
+    %         stand_cent_mo(i,:)
+    %         y(sk_mo(i,1:sk_len_mo(i))',:)
+    %     end   
+    
+
+    sk_len_sq,sk_len_mo
+    sk_len_sq_r,sk_len_mo_r
+    removal_threshold_sq,removal_threshold_mo
+    sk_len_h
+    real_cent_sq,real_cent_mo,real_cent_sq_r,real_cent_mo_r,real_cent_h
+end
+
+for times_count=1:times
+    con_table_mo=0;con_table_sq=0;
+    if gen=='Y' | gen=='y'
+        if type==2
+            mix=gmm(v,k,'ppca',hid_dim,dim,sigma_square,discen);
+            centres=mix.centres;priors=mix.priors;
+            [data,label]=gmmsamp(mix,dim,choice);
+            del(times_count)=1-sum(mix.priors.^2);
+            fprintf(fid60,'%f\n',del(times_count));
+            if choice==2
+                save('data3.dat','data','-ASCII')
+            elseif choice==4
+                save('data4.dat','data','-ASCII')
+            end
+        elseif type==1
+            mix=gmm(v,k,'spherical',1,dim,1,discen);
+            centres=mix.centres;priors=mix.priors;
+            [data,label]=gmmsamp(mix,dim,choice);
+            del(times_count)=1-sum(mix.priors.^2);
+            fprintf(fid60,'%f\n',del(times_count));
+            save('data2.dat','data','-ASCII')
+        elseif type==3
+            [data,label,priors,centres]=gareth_randn(v,k,dim,discen);
+            del(times_count)=1-sum(priors.^2);
+            save('data1.dat','data','-ASCII')
+        end
+    else
+        data1=load('mutz_clus.dat');
+    end
+    [R1,C1]=size(data1);
+    num_cate=0;wh_col=0;
+
+    y1=standard(data1,num_cate,wh_col,1,0);
+    
+    k_deter_start=2;
+    k_deter_end=10;
+    times_app=25;
+
+    [sk_hm,sk_len_hm,stand_cent_hm,real_cent_hm]=k_deter_hk(data1,y1,k_deter_start,k_deter_end,dim1,v1,times_app);
+    [R_hm,C_hm]=size(sk_hm);
+    clus_hm(times_count)=R_hm;
+    
+    removal_threshold_sqm=1;
+    [sk_sqm,sk_len_sqm,stand_cent_sqm,real_cent_sqm]=anomalous_pattern_kmeans(data1,y1,1,0,removal_threshold_sqm);
+    [R_sqm,C_sqm]=size(sk_sqm);
+    
+    removal_threshold_mom=1;
+    ym1=standard(data1,num_cate,wh_col,0,1);
+    [sk_mom,sk_len_mom,stand_cent_mom,real_cent_mom]=anomalous_pattern_kmeans(data1,ym1,0,1,removal_threshold_mom);
+    [R_mom,C_mom]=size(sk_mom);
+    
+    removal_threshold_sqm=1;
+    [sk_sq_rm,sk_len_sq_rm,stand_cent_sq_rm,real_cent_sq_rm]=anomalous_pattern_kmeans(data,y,1,0,removal_threshold_sq);
+    [R_sq_r,C_sq_r]=size(sk_sq_r);
+    while R_sq_r>=R_h*1.15
+        removal_threshold_sq=removal_threshold_sq+1;
+        [sk_sq_r,sk_len_sq_r,stand_cent_sq_r,real_cent_sq_r]=anomalous_pattern_kmeans(data,y,1,0,removal_threshold_sq);
+        [R_sq_r,C_sq_r]=size(sk_sq_r);
+    end
+    remove_thres_sq(times_count)=removal_threshold_sq;
+    clus_sq_r(times_count)=R_sq_r;
+
+    %     for i=1:R_sq
+    %         stand_cent_sq(i,:)
+    %         y(sk_sq(i,1:sk_len_sq(i))',:)
+    %     end
+
+    removal_threshold_mo=1;
+    ym=standard(data,num_cate,wh_col,0,1);
+    [sk_mo_r,sk_len_mo_r,stand_cent_mo_r,real_cent_mo_r]=anomalous_pattern_kmeans(data,ym,0,1,removal_threshold_mo);
+    [R_mo_r,C_mo_r]=size(sk_mo_r);
+    while R_mo_r>=R_h*1.15
+        removal_threshold_mo=removal_threshold_mo+1;
+        [sk_mo_r,sk_len_mo_r,stand_cent_mo_r,real_cent_mo_r]=anomalous_pattern_kmeans(data,ym,0,1,removal_threshold_mo);
+        [R_mo_r,C_mo_r]=size(sk_mo_r);
+    end
+    remove_thres_mo(times_count)=removal_threshold_mo;
+    clus_mo_r(times_count)=R_mo_r;
+    
+    
+    %     for i=1:R_mo
+    %         stand_cent_mo(i,:)
+    %         y(sk_mo(i,1:sk_len_mo(i))',:)
+    %     end   
+    
+
+    sk_len_sq,sk_len_mo
+    sk_len_sq_r,sk_len_mo_r
+    removal_threshold_sq,removal_threshold_mo
+    sk_len_h
+    real_cent_sq,real_cent_mo,real_cent_sq_r,real_cent_mo_r,real_cent_h
+end
+
+%%%%%contigency table%%%%%%
+con_table_1=zeros(R_sq,R_mo);
+for iii=1:R_sq
+    for jjj=1:R_mo
+        count=0;
+        for kkk=1:sk_len_sq(iii)
+            for lll=1:sk_len_mo(jjj)
+                if sk_sq(iii,kkk)==sk_mo(jjj,lll)
+                    count=count+1;
+                end
+            end
+        end
+        con_table_1(iii,jjj)=count;
+    end
+end
+
+con_table_2=zeros(R_sq,R_h);
+for iii=1:R_sq
+    for jjj=1:R_h
+        count=0;
+        for kkk=1:sk_len_sq(iii)
+            for lll=1:sk_len_h(jjj)
+                if sk_sq(iii,kkk)==sk_h(jjj,lll)
+                    count=count+1;
+                end
+            end
+        end
+        con_table_2(iii,jjj)=count;
+    end
+end
+
+con_table_3=zeros(R_h,R_mo);
+for iii=1:R_h
+    for jjj=1:R_mo
+        count=0;
+        for kkk=1:sk_len_h(iii)
+            for lll=1:sk_len_mo(jjj)
+                if sk_h(iii,kkk)==sk_mo(jjj,lll)
+                    count=count+1;
+                end
+            end
+        end
+        con_table_3(iii,jjj)=count;
+    end
+end
+
+con_table_4=zeros(R_sq_r,R_mo_r);
+for iii=1:R_sq_r
+    for jjj=1:R_mo_r
+        count=0;
+        for kkk=1:sk_len_sq_r(iii)
+            for lll=1:sk_len_mo_r(jjj)
+                if sk_sq_r(iii,kkk)==sk_mo_r(jjj,lll)
+                    count=count+1;
+                end
+            end
+        end
+        con_table_4(iii,jjj)=count;
+    end
+end
+
+con_table_5=zeros(R_sq_r,R_h);
+for iii=1:R_sq_r
+    for jjj=1:R_h
+        count=0;
+        for kkk=1:sk_len_sq_r(iii)
+            for lll=1:sk_len_h(jjj)
+                if sk_sq_r(iii,kkk)==sk_h(jjj,lll)
+                    count=count+1;
+                end
+            end
+        end
+        con_table_5(iii,jjj)=count;
+    end
+end
+
+con_table_6=zeros(R_h,R_mo_r);
+for iii=1:R_h
+    for jjj=1:R_mo_r
+        count=0;
+        for kkk=1:sk_len_h(iii)
+            for lll=1:sk_len_mo_r(jjj)
+                if sk_h(iii,kkk)==sk_mo_r(jjj,lll)
+                    count=count+1;
+                end
+            end
+        end
+        con_table_6(iii,jjj)=count;
+    end
+end
+
+con_table_7=zeros(R_sq_r,R_sq);
+for iii=1:R_sq_r
+    for jjj=1:R_sq
+        count=0;
+        for kkk=1:sk_len_sq_r(iii)
+            for lll=1:sk_len_sq(jjj)
+                if sk_sq_r(iii,kkk)==sk_sq(jjj,lll)
+                    count=count+1;
+                end
+            end
+        end
+        con_table_7(iii,jjj)=count;
+    end
+end
+
+con_table_8=zeros(R_mo_r,R_mo);
+for iii=1:R_mo_r
+    for jjj=1:R_mo
+        count=0;
+        for kkk=1:sk_len_mo_r(iii)
+            for lll=1:sk_len_mo(jjj)
+                if sk_mo_r(iii,kkk)==sk_mo(jjj,lll)
+                    count=count+1;
+                end
+            end
+        end
+        con_table_8(iii,jjj)=count;
+    end
+end
+
+%     [R_a,C_a]=size(sk_a);
+%     clus_a(times_count)=R_a;
+% 
+%     [R_d,C_d]=size(sk_d);
+%     clus_d(times_count)=R_d;
+    
+%     if type==1
+%         fprintf(fid49,'%f\n','cl');
+%         fprintf(fid50,'%f\n','au');
+%         fprintf(fid51,'%f\n','avd');
+%     elseif type==2
+%         if choice==2
+%             fprintf(fid49,'%f\n','cl');
+%             fprintf(fid50,'%f\n','au');
+%             fprintf(fid51,'%f\n','avd');
+%         elseif choice==4
+%             fprintf(fid49,'%f\n','cl');
+%             fprintf(fid50,'%f\n','au');
+%             fprintf(fid51,'%f\n','avd');
+%         end
+%     elseif type==3
+%         fprintf(fid49,'%f\n','cl');
+%         fprintf(fid50,'%f\n','au');
+%         fprintf(fid51,'%f\n','avd');
+%     end
+    
+%     cloyv(times_count,:)=cl;
+%     aucdf(times_count,:)=au;
+%     avdis(times_count,:)=avd;
+% 
+%     [sk_c,sk_len_c,stand_cent_c,real_cent_c]=k_deter_ck(data,y,k_deter_start,k_deter_end,dim,v,times_app,centi,knum,wk,len_clus,kl,standc,realc);
+%     [R_c,C_c]=size(sk_c);
+%     clus_c(times_count)=R_c;
+% 
+%     [sk_j,sk_len_j,stand_cent_j,real_cent_j]=jump_statis(data,y,k_deter_start,k_deter_end,dim,v,times_app,centi,knum,wk,len_clus,kl,standc,realc);
+%     [R_j,C_j]=size(sk_j);
+%     clus_j(times_count)=R_j;
+% 
+%     [sk_s,sk_len_s,stand_cent_s,real_cent_s]=silhouette(data,y,k_deter_start,k_deter_end,dim,v,times_app,centi,knum,wk,len_clus,kl,standc,realc);
+%     [R_s,C_s]=size(sk_s);
+%     clus_s(times_count)=R_s;
+       
+
+    
+%     %-------------------Davdis----------------%
+%     con_table_d=zeros(k,R_d);
+%     for t=1:k
+%         for u=1:R_d
+%             count=0;
+%             for i=1:len_list(t)
+%                 for j=1:sk_len_d(u)
+%                     if sk(t,i)==sk_d(u,j)
+%                         count=count+1;
+%                     end
+%                 end
+%             end
+%             con_table_d(t,u)=count;
+%         end
+%     end
+%     fre_con_table_d=con_table_d./R;
+%     ptplus_d=sum(fre_con_table_d,2);
+%     pplusu_d=sum(fre_con_table_d,1);
+%     %------------adjusted rand index------------%
+%     att=0;btt=0;ctt=0;
+%     ntplus=sum(con_table_d,2);
+%     nplusu=sum(con_table_d,1);
+%     for t=1:k
+%         for u=1:R_d
+%             att=att+(con_table_d(t,u)*(con_table_d(t,u)-1))/2;
+%         end
+%     end
+%     for t=1:k
+%         btt=btt+(ntplus(t)*(ntplus(t)-1))/2;
+%     end
+%     for u=1:R_d
+%         ctt=ctt+(nplusu(u)*(nplusu(u)-1))/2;
+%     end
+%     ari_d(times_count)=(att-((btt*ctt)/((R*(R-1))/2)))/(((btt+ctt)/2)-((btt*ctt)/((R*(R-1))/2)));
+%     %-------------relative distance M-----------%
+%     m_d(times_count)=sum(ptplus_d.^2)+sum(pplusu_d.^2)-2.*sum(sum(fre_con_table_d.^2));
+%     %-------------relative chi-square contingency coefficient--------%
+%     chi_tmp_d=0;
+%     for i=1:k
+%         for j=1:R_d
+%             pt_pu_plus_tmp=ptplus_d(i)*pplusu_d(j);
+%             if pt_pu_plus_tmp==0
+%                 pt_pu_plus_tmp=1;
+%             end
+%             chi_tmp_d=chi_tmp_d+fre_con_table_d(i,j).^2/pt_pu_plus_tmp;
+%         end
+%     end
+%     chi_square_d=chi_tmp_d-1;
+%     T_d(times_count)=chi_square_d/sqrt((k-1)*(R_d-1));
+%     %----------------average distance between centroids--------------%
+%     a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_d,1)-stand_cent_d;
+%         tmp1=sum(tmp.^2,2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_d;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_d(a2(i),:),k,1)-centres;
+%             tmp1=sum(tmp.^2,2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt(1),s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_d(a1(i,j),:);
+%             tmp1=tmp1+sk_len_d(a1(i,j));
+%             tmp2=tmp2+(sum(tmp.^2,2))*sk_len_d(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_d_eucli(times_count)=0;
+%     for i=1:k
+%         adc_d_eucli(times_count)=adc_d_eucli(times_count)+len_list(i)*dis(i);
+%     end
+% 
+%     a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_d,1)-stand_cent_d;
+%         tmp1=sum(abs(tmp),2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_d;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_d(a2(i),:),k,1)-centres;
+%             tmp1=sum(abs(tmp),2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt(1),s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_d(a1(i,j),:);
+%             tmp1=tmp1+sk_len_d(a1(i,j));
+%             tmp2=tmp2+(sum(abs(tmp),2))*sk_len_d(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_d_man(times_count)=0;
+%     for i=1:k
+%         adc_d_man(times_count)=adc_d_man(times_count)+len_list(i)*dis(i);
+%     end
+%     %---------------------average overlap----------------------%
+%     con_table_tmp=con_table_d./repmat(sk_len_d,k,1);
+%     con_table_tmp1=con_table_d./repmat(len_list',1,R_d);
+% 
+%     mbc_table=(con_table_tmp+con_table_tmp1)./2;
+%     aver_overlap_d(times_count)=sum(sum(mbc_table.*fre_con_table_d));
+% 
+%     %-------------------Silhouette Width----------------%
+%     con_table_s=zeros(k,R_s);
+%     for t=1:k
+%         for u=1:R_s
+%             count=0;
+%             for i=1:len_list(t)
+%                 for j=1:sk_len_s(u)
+%                     if sk(t,i)==sk_s(u,j)
+%                         count=count+1;
+%                     end
+%                 end
+%             end
+%             con_table_s(t,u)=count;
+%         end
+%     end
+%     fre_con_table_s=con_table_s./R;
+%     ptplus_s=sum(fre_con_table_s,2);
+%     pplusu_s=sum(fre_con_table_s,1);
+%     %------------adjusted rand index------------%
+%     att=0;btt=0;ctt=0;
+%     ntplus=sum(con_table_s,2);
+%     nplusu=sum(con_table_s,1);
+%     for t=1:k
+%         for u=1:R_s
+%             att=att+(con_table_s(t,u)*(con_table_s(t,u)-1))/2;
+%         end
+%     end
+%     for t=1:k
+%         btt=btt+(ntplus(t)*(ntplus(t)-1))/2;
+%     end
+%     for u=1:R_s
+%         ctt=ctt+(nplusu(u)*(nplusu(u)-1))/2;
+%     end
+%     ari_s(times_count)=(att-((btt*ctt)/((R*(R-1))/2)))/(((btt+ctt)/2)-((btt*ctt)/((R*(R-1))/2)));
+%     %-------------relative distance M-----------%
+%     m_s(times_count)=sum(ptplus_s.^2)+sum(pplusu_s.^2)-2.*sum(sum(fre_con_table_s.^2));
+%     %-------------relative chi-square contingency coefficient--------%
+%     chi_tmp_s=0;
+%     for i=1:k
+%         for j=1:R_s
+%             pt_pu_plus_tmp=ptplus_s(i)*pplusu_s(j);
+%             if pt_pu_plus_tmp==0
+%                 pt_pu_plus_tmp=1;
+%             end
+%             chi_tmp_s=chi_tmp_s+fre_con_table_s(i,j).^2/pt_pu_plus_tmp;
+%         end
+%     end
+%     chi_square_s=chi_tmp_s-1;
+%     T_s(times_count)=chi_square_s/sqrt((k-1)*(R_s-1));
+%     %----------------average distance between centroids--------------%
+%     a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_s,1)-stand_cent_s;
+%         tmp1=sum(tmp.^2,2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_s;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_s(a2(i),:),k,1)-centres;
+%             tmp1=sum(tmp.^2,2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt(1),s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_s(a1(i,j),:);
+%             tmp1=tmp1+sk_len_s(a1(i,j));
+%             tmp2=tmp2+(sum(tmp.^2,2))*sk_len_s(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_s_eucli(times_count)=0;
+%     for i=1:k
+%         adc_s_eucli(times_count)=adc_s_eucli(times_count)+len_list(i)*dis(i);
+%     end
+% 
+%     a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_s,1)-stand_cent_s;
+%         tmp1=sum(abs(tmp),2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_s;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_s(a2(i),:),k,1)-centres;
+%             tmp1=sum(abs(tmp),2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt(1),s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_s(a1(i,j),:);
+%             tmp1=tmp1+sk_len_s(a1(i,j));
+%             tmp2=tmp2+(sum(abs(tmp),2))*sk_len_s(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_s_man(times_count)=0;
+%     for i=1:k
+%         adc_s_man(times_count)=adc_s_man(times_count)+len_list(i)*dis(i);
+%     end
+%     %---------------------average overlap----------------------%
+%     con_table_tmp=con_table_s./repmat(sk_len_s,k,1);
+%     con_table_tmp1=con_table_s./repmat(len_list',1,R_s);
+% 
+%     mbc_table=(con_table_tmp+con_table_tmp1)./2;
+%     aver_overlap_s(times_count)=sum(sum(mbc_table.*fre_con_table_s));
+% 
+%     %-----------------------Hartigan----------------%
+%     con_table_h=zeros(k,R_h);
+%     for t=1:k
+%         for u=1:R_h
+%             count=0;
+%             for i=1:len_list(t)
+%                 for j=1:sk_len_h(u)
+%                     if sk(t,i)==sk_h(u,j)
+%                         count=count+1;
+%                     end
+%                 end
+%             end
+%             con_table_h(t,u)=count;
+%         end
+%     end
+%     fre_con_table_h=con_table_h./R;
+%     ptplus_h=sum(fre_con_table_h,2);
+%     pplusu_h=sum(fre_con_table_h,1);
+%     %------------adjusted rand index------------%
+%     att=0;btt=0;ctt=0;
+%     ntplus=sum(con_table_h,2);
+%     nplusu=sum(con_table_h,1);
+%     for t=1:k
+%         for u=1:R_h
+%             att=att+(con_table_h(t,u)*(con_table_h(t,u)-1))/2;
+%         end
+%     end
+%     for t=1:k
+%         btt=btt+(ntplus(t)*(ntplus(t)-1))/2;
+%     end
+%     for u=1:R_h
+%         ctt=ctt+(nplusu(u)*(nplusu(u)-1))/2;
+%     end
+%     ari_h(times_count)=(att-((btt*ctt)/((R*(R-1))/2)))/(((btt+ctt)/2)-((btt*ctt)/((R*(R-1))/2)));
+%     %-------------relative distance M-----------%
+%     m_h(times_count)=sum(ptplus_h.^2)+sum(pplusu_h.^2)-2.*sum(sum(fre_con_table_h.^2));
+%     %-------------relative chi-square contingency coefficient--------%
+%     chi_tmp_h=0;
+%     for i=1:k
+%         for j=1:R_h
+%             pt_pu_plus_tmp=ptplus_h(i)*pplusu_h(j);
+%             if pt_pu_plus_tmp==0
+%                 pt_pu_plus_tmp=1;
+%             end
+%             chi_tmp_h=chi_tmp_h+fre_con_table_h(i,j).^2/pt_pu_plus_tmp;
+%         end
+%     end
+%     chi_square_h=chi_tmp_h-1;
+%     T_h(times_count)=chi_square_h/sqrt((k-1)*(R_h-1));
+%     %----------------average distance between centroids--------------%
+%     a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_h,1)-stand_cent_h;
+%         tmp1=sum(tmp.^2,2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_h;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_h(a2(i),:),k,1)-centres;
+%             tmp1=sum(tmp.^2,2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt,s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_h(a1(i,j),:);
+%             tmp1=tmp1+sk_len_h(a1(i,j));
+%             tmp2=tmp2+(sum(tmp.^2,2))*sk_len_h(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_h_eucli(times_count)=0;
+%     for i=1:k
+%         adc_h_eucli(times_count)=adc_h_eucli(times_count)+len_list(i)*dis(i);
+%     end
+% 
+%     a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_h,1)-stand_cent_h;
+%         tmp1=sum(abs(tmp),2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_h;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_h(a2(i),:),k,1)-centres;
+%             tmp1=sum(abs(tmp),2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt(1),s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_h(a1(i,j),:);
+%             tmp1=tmp1+sk_len_h(a1(i,j));
+%             tmp2=tmp2+(sum(abs(tmp),2))*sk_len_h(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_h_man(times_count)=0;
+%     for i=1:k
+%         adc_h_man(times_count)=adc_h_man(times_count)+len_list(i)*dis(i);
+%     end
+%     %---------------------average overlap----------------------%
+%     con_table_tmp=con_table_h./repmat(sk_len_h,k,1);
+%     con_table_tmp1=con_table_h./repmat(len_list',1,R_h);
+% 
+%     mbc_table=(con_table_tmp+con_table_tmp1)./2;
+%     aver_overlap_h(times_count)=sum(sum(mbc_table.*fre_con_table_h));
+% 
+%     %-----------------------Calinski and Harabasz----------------%
+%     con_table_c=zeros(k,R_c);
+%     for t=1:k
+%         for u=1:R_c
+%             count=0;
+%             for i=1:len_list(t)
+%                 for j=1:sk_len_c(u)
+%                     if sk(t,i)==sk_c(u,j)
+%                         count=count+1;
+%                     end
+%                 end
+%             end
+%             con_table_c(t,u)=count;
+%         end
+%     end
+%     fre_con_table_c=con_table_c./R;
+%     ptplus_c=sum(fre_con_table_c,2);
+%     pplusu_c=sum(fre_con_table_c,1);
+%     %------------adjusted rand index------------%
+%     att=0;btt=0;ctt=0;
+%     ntplus=sum(con_table_c,2);
+%     nplusu=sum(con_table_c,1);
+%     for t=1:k
+%         for u=1:R_c
+%             att=att+(con_table_c(t,u)*(con_table_c(t,u)-1))/2;
+%         end
+%     end
+%     for t=1:k
+%         btt=btt+(ntplus(t)*(ntplus(t)-1))/2;
+%     end
+%     for u=1:R_c
+%         ctt=ctt+(nplusu(u)*(nplusu(u)-1))/2;
+%     end
+%     ari_c(times_count)=(att-((btt*ctt)/((R*(R-1))/2)))/(((btt+ctt)/2)-((btt*ctt)/((R*(R-1))/2)));
+%     %-------------relative distance M-----------%
+%     m_c(times_count)=sum(ptplus_c.^2)+sum(pplusu_c.^2)-2.*sum(sum(fre_con_table_c.^2));
+%     %-------------relative chi-square contingency coefficient--------%
+%     chi_tmp_c=0;
+%     for i=1:k
+%         for j=1:R_c
+%             pt_pu_plus_tmp=ptplus_c(i)*pplusu_c(j);
+%             if pt_pu_plus_tmp==0
+%                 pt_pu_plus_tmp=1;
+%             end
+%             chi_tmp_c=chi_tmp_c+fre_con_table_c(i,j).^2/pt_pu_plus_tmp;
+%         end
+%     end
+%     chi_square_c=chi_tmp_c-1;
+%     T_c(times_count)=chi_square_c/sqrt((k-1)*(R_c-1));
+%     %----------------average distance between centroids--------------%
+%      a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_c,1)-stand_cent_c;
+%         tmp1=sum(tmp.^2,2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_c;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_c(a2(i),:),k,1)-centres;
+%             tmp1=sum(tmp.^2,2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt(1),s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_c(a1(i,j),:);
+%             tmp1=tmp1+sk_len_c(a1(i,j));
+%             tmp2=tmp2+(sum(tmp.^2,2))*sk_len_c(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_c_eucli(times_count)=0;
+%     for i=1:k
+%         adc_c_eucli(times_count)=adc_c_eucli(times_count)+len_list(i)*dis(i);
+%     end
+% 
+%     a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_c,1)-stand_cent_c;
+%         tmp1=sum(abs(tmp),2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_c;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_c(a2(i),:),k,1)-centres;
+%             tmp1=sum(abs(tmp),2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt(1),s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_c(a1(i,j),:);
+%             tmp1=tmp1+sk_len_c(a1(i,j));
+%             tmp2=tmp2+(sum(abs(tmp),2))*sk_len_c(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_c_man(times_count)=0;
+%     for i=1:k
+%         adc_c_man(times_count)=adc_c_man(times_count)+len_list(i)*dis(i);
+%     end
+%     %---------------------average overlap----------------------%
+%     con_table_tmp=con_table_c./repmat(sk_len_c,k,1);
+%     con_table_tmp1=con_table_c./repmat(len_list',1,R_c);
+% 
+%     mbc_table=(con_table_tmp+con_table_tmp1)./2;
+%     aver_overlap_c(times_count)=sum(sum(mbc_table.*fre_con_table_c));
+% 
+%     %-----------------------Jump Statistic----------------%
+%     con_table_j=zeros(k,R_j);
+%     for t=1:k
+%         for u=1:R_j
+%             count=0;
+%             for i=1:len_list(t)
+%                 for j=1:sk_len_j(u)
+%                     if sk(t,i)==sk_j(u,j)
+%                         count=count+1;
+%                     end
+%                 end
+%             end
+%             con_table_j(t,u)=count;
+%         end
+%     end
+%     fre_con_table_j=con_table_j./R;
+%     ptplus_j=sum(fre_con_table_j,2);
+%     pplusu_j=sum(fre_con_table_j,1);
+%     %------------adjusted rand index------------%
+%     att=0;btt=0;ctt=0;
+%     ntplus=sum(con_table_j,2);
+%     nplusu=sum(con_table_j,1);
+%     for t=1:k
+%         for u=1:R_j
+%             att=att+(con_table_j(t,u)*(con_table_j(t,u)-1))/2;
+%         end
+%     end
+%     for t=1:k
+%         btt=btt+(ntplus(t)*(ntplus(t)-1))/2;
+%     end
+%     for u=1:R_j
+%         ctt=ctt+(nplusu(u)*(nplusu(u)-1))/2;
+%     end
+%     ari_j(times_count)=(att-((btt*ctt)/((R*(R-1))/2)))/(((btt+ctt)/2)-((btt*ctt)/((R*(R-1))/2)));
+%     %-------------relative distance M-----------%
+%     m_j(times_count)=sum(ptplus_j.^2)+sum(pplusu_j.^2)-2.*sum(sum(fre_con_table_j.^2));
+%     %-------------relative chi-square contingency coefficient--------%
+%     chi_tmp_j=0;
+%     for i=1:k
+%         for j=1:R_j
+%             pt_pu_plus_tmp=ptplus_j(i)*pplusu_j(j);
+%             if pt_pu_plus_tmp==0
+%                 pt_pu_plus_tmp=1;
+%             end
+%             chi_tmp_j=chi_tmp_j+fre_con_table_j(i,j).^2/pt_pu_plus_tmp;
+%         end
+%     end
+%     chi_square_j=chi_tmp_j-1;
+%     T_j(times_count)=chi_square_j/sqrt((k-1)*(R_j-1));
+%     %----------------average distance between centroids--------------%
+%     a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_j,1)-stand_cent_j;
+%         tmp1=sum(tmp.^2,2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_j;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_j(a2(i),:),k,1)-centres;
+%             tmp1=sum(tmp.^2,2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt(1),s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_j(a1(i,j),:);
+%             tmp1=tmp1+sk_len_j(a1(i,j));
+%             tmp2=tmp2+(sum(tmp.^2,2))*sk_len_j(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_j_eucli(times_count)=0;
+%     for i=1:k
+%         adc_j_eucli(times_count)=adc_j_eucli(times_count)+len_list(i)*dis(i);
+%     end
+% 
+%     a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_j,1)-stand_cent_j;
+%         tmp1=sum(abs(tmp),2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_j;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_j(a2(i),:),k,1)-centres;
+%             tmp1=sum(abs(tmp),2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt(1),s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_j(a1(i,j),:);
+%             tmp1=tmp1+sk_len_j(a1(i,j));
+%             tmp2=tmp2+(sum(abs(tmp),2))*sk_len_j(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_j_man(times_count)=0;
+%     for i=1:k
+%         adc_j_man(times_count)=adc_j_man(times_count)+len_list(i)*dis(i);
+%     end
+%     %---------------------average overlap----------------------%
+%     con_table_tmp=con_table_j./repmat(sk_len_j,k,1);
+%     con_table_tmp1=con_table_j./repmat(len_list',1,R_j);
+% 
+%     mbc_table=(con_table_tmp+con_table_tmp1)./2;
+%     aver_overlap_j(times_count)=sum(sum(mbc_table.*fre_con_table_j));
+% 
+%     %-----------------------Consensus Distribution----------------%
+%     con_table_a=zeros(k,R_a);
+%     for t=1:k
+%         for u=1:R_a
+%             count=0;
+%             for i=1:len_list(t)
+%                 for j=1:sk_len_a(u)
+%                     if sk(t,i)==sk_a(u,j)
+%                         count=count+1;
+%                     end
+%                 end
+%             end
+%             con_table_a(t,u)=count;
+%         end
+%     end
+%     fre_con_table_a=con_table_a./R;
+%     ptplus_a=sum(fre_con_table_a,2);
+%     pplusu_a=sum(fre_con_table_a,1);
+%     %------------adjusted rand index------------%
+%     att=0;btt=0;ctt=0;
+%     ntplus=sum(con_table_a,2);
+%     nplusu=sum(con_table_a,1);
+%     for t=1:k
+%         for u=1:R_a
+%             att=att+(con_table_a(t,u)*(con_table_a(t,u)-1))/2;
+%         end
+%     end
+%     for t=1:k
+%         btt=btt+(ntplus(t)*(ntplus(t)-1))/2;
+%     end
+%     for u=1:R_a
+%         ctt=ctt+(nplusu(u)*(nplusu(u)-1))/2;
+%     end
+%     ari_a(times_count)=(att-((btt*ctt)/((R*(R-1))/2)))/(((btt+ctt)/2)-((btt*ctt)/((R*(R-1))/2)));
+%     %-------------relative distance M-----------%
+%     m_a(times_count)=sum(ptplus_a.^2)+sum(pplusu_a.^2)-2.*sum(sum(fre_con_table_a.^2));
+%     %-------------relative chi-square contingency coefficient--------%
+%     chi_tmp_a=0;
+%     for i=1:k
+%         for j=1:R_a
+%             pt_pu_plus_tmp=ptplus_a(i)*pplusu_a(j);
+%             if pt_pu_plus_tmp==0
+%                 pt_pu_plus_tmp=1;
+%             end
+%             chi_tmp_a=chi_tmp_a+fre_con_table_a(i,j).^2/pt_pu_plus_tmp;
+%         end
+%     end
+%     chi_square_a=chi_tmp_a-1;
+%     T_a(times_count)=chi_square_a/sqrt((k-1)*(R_a-1));
+%     %----------------average distance between centroids--------------%
+%     a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_a,1)-stand_cent_a;
+%         tmp1=sum(tmp.^2,2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_a;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_a(a2(i),:),k,1)-centres;
+%             tmp1=sum(tmp.^2,2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt(1),s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_a(a1(i,j),:);
+%             tmp1=tmp1+sk_len_a(a1(i,j));
+%             tmp2=tmp2+(sum(tmp.^2,2))*sk_len_a(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_a_eucli(times_count)=0;
+%     for i=1:k
+%         adc_a_eucli(times_count)=adc_a_eucli(times_count)+len_list(i)*dis(i);
+%     end
+% 
+%     a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_a,1)-stand_cent_a;
+%         tmp1=sum(abs(tmp),2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_a;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_a(a2(i),:),k,1)-centres;
+%             tmp1=sum(abs(tmp),2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt(1),s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_a(a1(i,j),:);
+%             tmp1=tmp1+sk_len_a(a1(i,j));
+%             tmp2=tmp2+(sum(abs(tmp),2))*sk_len_a(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_a_man(times_count)=0;
+%     for i=1:k
+%         adc_a_man(times_count)=adc_a_man(times_count)+len_list(i)*dis(i);
+%     end
+%     %---------------------average overlap----------------------%
+%     con_table_tmp=con_table_a./repmat(sk_len_a,k,1);
+%     con_table_tmp1=con_table_a./repmat(len_list',1,R_a);
+% 
+%     mbc_table=(con_table_tmp+con_table_tmp1)./2;
+%     aver_overlap_a(times_count)=sum(sum(mbc_table.*fre_con_table_a));
+% 
+%     %------------------least square version-----------------%
+%     con_table_sq=zeros(k,R_sq);
+%     for t=1:k
+%         for u=1:R_sq
+%             count=0;
+%             for i=1:len_list(t)
+%                 for j=1:sk_len_sq(u)
+%                     if sk(t,i)==sk_sq(u,j)
+%                         count=count+1;
+%                     end
+%                 end
+%             end
+%             con_table_sq(t,u)=count;
+%         end
+%     end
+%     fre_con_table_sq=con_table_sq./R;
+%     ptplus_sq=sum(fre_con_table_sq,2);
+%     pplusu_sq=sum(fre_con_table_sq,1);
+%     %------------adjusted rand index------------%
+%     att=0;btt=0;ctt=0;
+%     ntplus=sum(con_table_sq,2);
+%     nplusu=sum(con_table_sq,1);
+%     for t=1:k
+%         for u=1:R_sq
+%             att=att+(con_table_sq(t,u)*(con_table_sq(t,u)-1))/2;
+%         end
+%     end
+%     for t=1:k
+%         btt=btt+(ntplus(t)*(ntplus(t)-1))/2;
+%     end
+%     for u=1:R_sq
+%         ctt=ctt+(nplusu(u)*(nplusu(u)-1))/2;
+%     end
+%     ari_sq(times_count)=(att-((btt*ctt)/((R*(R-1))/2)))/(((btt+ctt)/2)-((btt*ctt)/((R*(R-1))/2)));
+%     %-------------relative distance M-----------%
+%     m_sq(times_count)=sum(ptplus_sq.^2)+sum(pplusu_sq.^2)-2.*sum(sum(fre_con_table_sq.^2));
+%     %-------------relative chi-square contingency coefficient--------%
+%     chi_tmp_sq=0;
+%     for i=1:k
+%         for j=1:R_sq
+%             pt_pu_plus_tmp=ptplus_sq(i)*pplusu_sq(j);
+%             if pt_pu_plus_tmp==0
+%                 pt_pu_plus_tmp=1;
+%             end
+%             chi_tmp_sq=chi_tmp_sq+fre_con_table_sq(i,j).^2/pt_pu_plus_tmp;
+%         end
+%     end
+%     chi_square_sq=chi_tmp_sq-1;
+%     T_sq(times_count)=chi_square_sq/sqrt((k-1)*(R_sq-1));
+%     %----------------average distance between centroids--------------%
+%     a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_sq,1)-stand_cent_sq;
+%         tmp1=sum(tmp.^2,2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_sq;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_sq(a2(i),:),k,1)-centres;
+%             tmp1=sum(tmp.^2,2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt(1),s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_sq(a1(i,j),:);
+%             tmp1=tmp1+sk_len_sq(a1(i,j));
+%             tmp2=tmp2+(sum(tmp.^2,2))*sk_len_sq(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_sq_eucli(times_count)=0;
+%     for i=1:k
+%         adc_sq_eucli(times_count)=adc_sq_eucli(times_count)+len_list(i)*dis(i);
+%     end
+% 
+%     a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_sq,1)-stand_cent_sq;
+%         tmp1=sum(abs(tmp),2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_sq;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_sq(a2(i),:),k,1)-centres;
+%             tmp1=sum(abs(tmp),2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt(1),s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_sq(a1(i,j),:);
+%             tmp1=tmp1+sk_len_sq(a1(i,j));
+%             tmp2=tmp2+(sum(abs(tmp),2))*sk_len_sq(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_sq_man(times_count)=0;
+%     for i=1:k
+%         adc_sq_man(times_count)=adc_sq_man(times_count)+len_list(i)*dis(i);
+%     end
+%     %---------------------average overlap----------------------%
+%     con_table_tmp=con_table_sq./repmat(sk_len_sq,k,1);
+%     con_table_tmp1=con_table_sq./repmat(len_list',1,R_sq);
+% 
+%     mbc_table=(con_table_tmp+con_table_tmp1)./2;
+%     aver_overlap_sq(times_count)=sum(sum(mbc_table.*fre_con_table_sq));
+% 
+%     %-------------------least moduli version-------------------%
+%     con_table_mo=zeros(k,R_mo);
+%     for t=1:k
+%         for u=1:R_mo
+%             count=0;
+%             for i=1:len_list(t)
+%                 for j=1:sk_len_mo(u)
+%                     if sk(t,i)==sk_mo(u,j)
+%                         count=count+1;
+%                     end
+%                 end
+%             end
+%             con_table_mo(t,u)=count;
+%         end
+%     end
+%     fre_con_table_mo=con_table_mo./R;
+%     ptplus_mo=sum(fre_con_table_mo,2);
+%     pplusu_mo=sum(fre_con_table_mo,1);
+%     %------------adjusted rand index------------%
+%     att=0;btt=0;ctt=0;
+%     ntplus=sum(con_table_mo,2);
+%     nplusu=sum(con_table_mo,1);
+%     for t=1:k
+%         for u=1:R_mo
+%             att=att+(con_table_mo(t,u)*(con_table_mo(t,u)-1))/2;
+%         end
+%     end
+%     for t=1:k
+%         btt=btt+(ntplus(t)*(ntplus(t)-1))/2;
+%     end
+%     for u=1:R_mo
+%         ctt=ctt+(nplusu(u)*(nplusu(u)-1))/2;
+%     end
+%     ari_mo(times_count)=(att-((btt*ctt)/((R*(R-1))/2)))/(((btt+ctt)/2)-((btt*ctt)/((R*(R-1))/2)));
+%     %-------------relative distance M-----------%
+%     m_mo(times_count)=sum(ptplus_mo.^2)+sum(pplusu_mo.^2)-2.*sum(sum(fre_con_table_mo.^2));
+%     %-------------relative chi-square contingency coefficient--------%
+%     chi_tmp_mo=0;
+%     for i=1:k
+%         for j=1:R_mo
+%             pt_pu_plus_tmp=ptplus_mo(i)*pplusu_mo(j);
+%             if pt_pu_plus_tmp==0
+%                 pt_pu_plus_tmp=1;
+%             end
+%             chi_tmp_mo=chi_tmp_mo+fre_con_table_mo(i,j).^2/pt_pu_plus_tmp;
+%         end
+%     end
+%     chi_square_mo=chi_tmp_mo-1;
+%     T_mo(times_count)=chi_square_mo/sqrt((k-1)*(R_mo-1));
+%     %----------------average distance between centroids--------------%
+%     a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_mo,1)-stand_cent_mo;
+%         tmp1=sum(tmp.^2,2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_mo;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_mo(a2(i),:),k,1)-centres;
+%             tmp1=sum(tmp.^2,2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt(1),s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_mo(a1(i,j),:);
+%             tmp1=tmp1+sk_len_mo(a1(i,j));
+%             tmp2=tmp2+(sum(tmp.^2,2))*sk_len_mo(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_mo_eucli(times_count)=0;
+%     for i=1:k
+%         adc_mo_eucli(times_count)=adc_mo_eucli(times_count)+len_list(i)*dis(i);
+%     end
+% 
+%     a1=[];s=[];a2=[];
+%     for i=1:k
+%         tmp=repmat(centres(i,:),R_mo,1)-stand_cent_mo;
+%         tmp1=sum(abs(tmp),2);
+%         indt=find(tmp1==min(tmp1));
+%         s(i)=1;
+%         a1(i)=indt(1);
+%     end
+%     tmp2=1:R_mo;
+%     a2=setdiff(tmp2,a1);
+%     [Ra,Ca]=size(a2);
+%     a1=a1';
+%     if Ca~=0
+%         for i=1:Ra
+%             tmp=repmat(stand_cent_mo(a2(i),:),k,1)-centres;
+%             tmp1=sum(abs(tmp),2);
+%             indt=find(tmp1==min(tmp1));
+%             a1(indt(1),s(indt)+1)=a2(i);
+%             s(indt)=s(indt)+1;
+%         end
+%     end
+%     for i=1:k
+%         tmp2=0;
+%         for j=1:s(i)
+%             tmp1=0;
+%             tmp=centres(i,:)-stand_cent_mo(a1(i,j),:);
+%             tmp1=tmp1+sk_len_mo(a1(i,j));
+%             tmp2=tmp2+(sum(abs(tmp),2))*sk_len_mo(a1(i,j));
+%         end
+%         dis(i)=tmp2/tmp1;
+%     end
+%     adc_mo_man(times_count)=0;
+%     for i=1:k
+%         adc_mo_man(times_count)=adc_mo_man(times_count)+len_list(i)*dis(i);
+%     end
+%     %---------------------average overlap----------------------%
+%     con_table_tmp=con_table_mo./repmat(sk_len_mo,k,1);
+%     con_table_tmp1=con_table_mo./repmat(len_list',1,R_mo);
+% 
+%     mbc_table=(con_table_tmp+con_table_tmp1)./2;
+%     aver_overlap_mo(times_count)=sum(sum(mbc_table.*fre_con_table_mo));
+%     
+%     %---------------------file saving-----------------------%
+%     fprintf(fid1,'%f\n',m_sq(times_count));
+%     fprintf(fid2,'%f\n',m_mo(times_count));
+%     fprintf(fid3,'%f\n',m_j(times_count));
+%     fprintf(fid4,'%f\n',m_a(times_count));
+%     fprintf(fid5,'%f\n',m_h(times_count));
+%     fprintf(fid6,'%f\n',m_c(times_count));
+%     fprintf(fid7,'%f\n',m_s(times_count));
+%     fprintf(fid8,'%f\n',m_d(times_count));
+% 
+%     fprintf(fid9,'%f\n',T_sq(times_count));
+%     fprintf(fid10,'%f\n',T_mo(times_count));
+%     fprintf(fid11,'%f\n',T_j(times_count));
+%     fprintf(fid12,'%f\n',T_a(times_count));
+%     fprintf(fid13,'%f\n',T_h(times_count));
+%     fprintf(fid14,'%f\n',T_c(times_count));
+%     fprintf(fid15,'%f\n',T_s(times_count));
+%     fprintf(fid16,'%f\n',T_d(times_count));
+% 
+%     fprintf(fid17,'%f\n',aver_overlap_sq(times_count));
+%     fprintf(fid18,'%f\n',aver_overlap_mo(times_count));
+%     fprintf(fid19,'%f\n',aver_overlap_j(times_count));
+%     fprintf(fid20,'%f\n',aver_overlap_a(times_count));
+%     fprintf(fid21,'%f\n',aver_overlap_h(times_count));
+%     fprintf(fid22,'%f\n',aver_overlap_c(times_count));
+%     fprintf(fid23,'%f\n',aver_overlap_s(times_count));
+%     fprintf(fid24,'%f\n',aver_overlap_d(times_count));
+% 
+%     fprintf(fid25,'%f\n',adc_sq_eucli(times_count));
+%     fprintf(fid26,'%f\n',adc_mo_eucli(times_count));
+%     fprintf(fid27,'%f\n',adc_j_eucli(times_count));
+%     fprintf(fid28,'%f\n',adc_a_eucli(times_count));
+%     fprintf(fid29,'%f\n',adc_h_eucli(times_count));
+%     fprintf(fid30,'%f\n',adc_c_eucli(times_count));
+%     fprintf(fid31,'%f\n',adc_s_eucli(times_count));
+%     fprintf(fid32,'%f\n',adc_d_eucli(times_count));
+% 
+%     fprintf(fid33,'%f\n',adc_sq_man(times_count));
+%     fprintf(fid34,'%f\n',adc_mo_man(times_count));
+%     fprintf(fid35,'%f\n',adc_j_man(times_count));
+%     fprintf(fid36,'%f\n',adc_a_man(times_count));
+%     fprintf(fid37,'%f\n',adc_h_man(times_count));
+%     fprintf(fid38,'%f\n',adc_c_man(times_count));
+%     fprintf(fid39,'%f\n',adc_s_man(times_count));
+%     fprintf(fid40,'%f\n',adc_d_man(times_count));
+% 
+%     fprintf(fid41,'%f\n',ari_sq(times_count));
+%     fprintf(fid42,'%f\n',ari_mo(times_count));
+%     fprintf(fid43,'%f\n',ari_j(times_count));
+%     fprintf(fid44,'%f\n',ari_a(times_count));
+%     fprintf(fid45,'%f\n',ari_h(times_count));
+%     fprintf(fid46,'%f\n',ari_c(times_count));
+%     fprintf(fid47,'%f\n',ari_s(times_count));
+%     fprintf(fid48,'%f\n',ari_d(times_count));
+%     
+%     fprintf(fid52,'%d\n',clus_sq(times_count));
+%     fprintf(fid53,'%d\n',clus_mo(times_count));
+%     fprintf(fid54,'%d\n',clus_j(times_count));
+%     fprintf(fid55,'%d\n',clus_a(times_count));
+%     fprintf(fid56,'%d\n',clus_h(times_count));
+%     fprintf(fid57,'%d\n',clus_c(times_count));
+%     fprintf(fid58,'%d\n',clus_s(times_count));
+%     fprintf(fid59,'%d\n',clus_d(times_count));
+%     
+% fclose(fid1);fclose(fid2);fclose(fid3);fclose(fid4);fclose(fid5);fclose(fid6);fclose(fid7);fclose(fid8);
+% fclose(fid9);fclose(fid10);fclose(fid11);fclose(fid12);fclose(fid13);fclose(fid14);fclose(fid15);fclose(fid16);
+% fclose(fid17);fclose(fid18);fclose(fid19);fclose(fid20);fclose(fid21);fclose(fid22);fclose(fid23);fclose(fid24);
+% fclose(fid25);fclose(fid26);fclose(fid27);fclose(fid28);fclose(fid29);fclose(fid30);fclose(fid31);fclose(fid32);
+% fclose(fid33);fclose(fid34);fclose(fid35);fclose(fid36);fclose(fid37);fclose(fid38);fclose(fid39);fclose(fid40);
+% fclose(fid41);fclose(fid42);fclose(fid43);fclose(fid44);fclose(fid45);fclose(fid46);fclose(fid47);fclose(fid48);
+% fclose(fid49);fclose(fid50);fclose(fid51);
+% fclose(fid52);fclose(fid53);fclose(fid54);fclose(fid55);fclose(fid56);fclose(fid57);fclose(fid58);fclose(fid59);
