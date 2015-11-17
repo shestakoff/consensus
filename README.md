@@ -30,8 +30,6 @@ Some parts of the functions may vary depending on the goals of your experiments.
 Main function of this step is *FrameInit(Options)* with input structure *Options*:
 
 ```
-#!matlab
-
 Options.DataDir = './data/'; % directory with datasets or generators
 Options.ConsensusDir = './algorithms/'; % directory with algorithms
 Options.UtilsDir = './utils/'; % directory with some useful utilities
@@ -62,7 +60,6 @@ The third column contains the structure that represents parameters of correspond
 
 Example:
 ```
-#!matlab
 DataParams.PartitionGenParams.numObjects = 500;
 DataParams.PartitionGenParams.numClusters = 4;
 DataParams.PartitionGenParams.minObjects = 50;
